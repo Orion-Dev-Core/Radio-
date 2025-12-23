@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Chat DJ - Your Music Companion</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .header-icons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #cbd5e1;
+            margin-top: 10px;
+        }
+
+        .channels {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .channel-btn {
+            position: relative;
+            padding: 25px;
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .channel-btn:active {
+            transform: scale(0.98);
+        }
+
+        .channel-btn.active {
+            box-shadow: 0 0 0 4px white, 0 8px 25px rgba(0,0,0,0.4);
+            transform: scale(1.02);
+        }
+
+        .channel-bg {
+            position: absolute;
+            inset: 0;
+            opacity: 0.9;
+        }
+
+        .ch1-bg { background: linear-gradient(135deg, #a855f7, #ec4899); }
+        .ch2-bg { background: linear-gradient(135deg, #f97316, #ef4444); }
+        .ch3-bg { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+
+        .channel-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .channel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .channel-num {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .equalizer {
+            display: flex;
+            gap: 3px;
+            align-items: flex-end;
+            height: 24px;
+        }
+
+        .eq-bar {
+            width: 3px;
+            background: white;
+            border-radius: 2px;
+            animation: equalizer 0.8s ease-in-out infinite;
+        }
+
+        .eq-bar:nth-child(1) { animation-delay: 0s; }
+        .eq-bar:nth-child(2) { animation-delay: 0.2s; }
+        .eq-bar:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes equalizer {
+            0%, 100% { height: 8px; }
+            50% { height: 24px; }
+        }
+
+        .channel-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .channel-genre {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .player {
+            background: rgba(30, 30, 50, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .now-playing h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .now-playing p {
+            color: #c084fc;
+            font-size: 0.9rem;
+        }
+
+        .play-btn {
+            background: #9333ea;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+        }
+
+        .play-btn:active {
+            transform: scale(0.95);
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .volume-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .volume-slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #374151;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #9333ea;
+            cursor: pointer;
+        }
+
+        .volume-text {
+            min-width: 45px;
+            text-align: right;
+            font-size: 0.9rem;
+        }
+
+        .chat-section {
+            background: rgba(30, 30, 50, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .chat-header {
+            background: linear-gradient(90deg, #9333ea, #ec4899);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-header h3 {
+            font-size: 1.1rem;
+        }
+
+        .api-input-section {
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .api-input-section p {
+            color: #cbd5e1;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .api-input {
+            width: 100%;
+            padding: 15px;
+            background: #1e293b;
+            border: 2px solid #374151;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .api-input:focus {
+            outline: none;
+            border-color: #9333ea;
+        }
+
+        .connect-btn {
+            width: 100%;
+            padding: 15px;
+            background: #9333ea;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .connect-btn:active {
+            transform: scale(0.98);
+            background: #7e22ce;
+        }
+
+        .api-hint {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            margin-top: 15px;
+        }
+
+        .chat-messages {
+            height: 300px;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: #9333ea;
+            border-radius: 18px 18px 4px 18px;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+            background: #374151;
+            border-radius: 18px 18px 18px 4px;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-input-section {
+            padding: 15px;
+            border-top: 1px solid #374151;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: #1e293b;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .chat-input:focus {
+            outline: none;
+        }
+
+        .send-btn {
+            background: #9333ea;
+            border: none;
+            border-radius: 12px;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .icon-pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icons">
+                <i data-lucide="radio" width="40" height="40" class="icon-pulse"></i>
+                <h1>Chat DJ</h1>
+                <i data-lucide="sparkles" width="40" height="40"></i>
+            </div>
+            <p>Your AI-powered music companion</p>
+        </div>
+
+        <div class="channels">
+            <button class="channel-btn" data-channel="1">
+                <div class="channel-bg ch1-bg"></div>
+                <div class="channel-content">
+                    <div class="channel-header">
+                        <span class="channel-num">Ch 1</span>
+                        <div class="equalizer hidden">
+                            <div class="eq-bar"></div>
+                            <div class="eq-bar"></div>
+                            <div class="eq-bar"></div>
+                        </div>
+                    </div>
+                    <div class="channel-name">EDM</div>
+                    <div class="channel-genre">Electronic Dance Music</div>
+                </div>
+            </button>
+
+            <button class="channel-btn" data-channel="2">
+                <div class="channel-bg ch2-bg"></div>
+                <div class="channel-content">
+                    <div class="channel-header">
+                        <span class="channel-num">Ch 2</span>
+                        <div class="equalizer hidden">
+                            <div class="eq-bar"></div>
+                            <div class="eq-bar"></div>
+                            <div class="eq-bar"></div>
+                        </div>
+                    </div>
+                    <div class="channel-name">Afro House</div>
+                    <div class="channel-genre">Afro House Beats</div>
+                </div>
+            </button>
+
+            <button class="channel-btn" data-channel="3">
+                <div class="channel-bg ch3-bg"></div>
+                <div class="channel-content">
+                    <div class="channel-header">
+                        <span class="channel-num">Ch 3</span>
+                        <div class="equalizer hidden">
+                            <div class="eq-bar"></div>
+                            <div class="eq-bar"></div>
+                            <div class="eq-bar"></div>
+                        </div>
+                    </div>
+                    <div class="channel-name">Rock & Pop</div>
+                    <div class="channel-genre">90s to Now</div>
+                </div>
+            </button>
+        </div>
+
+        <div class="player hidden" id="player">
+            <div class="player-header">
+                <div class="now-playing">
+                    <h3>Now Playing</h3>
+                    <p id="current-channel"></p>
+                </div>
+                <button class="play-btn" id="playPauseBtn">
+                    <i data-lucide="play" width="28" height="28" stroke="white"></i>
+                </button>
+            </div>
+            <div class="volume-control">
+                <button class="volume-btn" id="muteBtn">
+                    <i data-lucide="volume-2" width="24" height="24"></i>
+                </button>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+                <span class="volume-text" id="volumeText">70%</span>
+            </div>
+        </div>
+
+        <div class="chat-section">
+            <div class="chat-header">
+                <i data-lucide="sparkles" width="20" height="20"></i>
+                <h3>Gemini AI DJ</h3>
+            </div>
+
+            <div id="apiInputSection" class="api-input-section">
+                <p>Enter your Gemini API key to chat with your AI DJ</p>
+                <input type="password" class="api-input" id="apiKeyInput" placeholder="GEMINI_API_KEY">
+                <button class="connect-btn" id="connectBtn">Connect DJ</button>
+                <p class="api-hint">Get your free API key from: ai.google.dev</p>
+            </div>
+
+            <div id="chatSection" class="hidden">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message assistant">🎉 Hey! I'm your AI DJ! Ask me about music or chat while you listen! 🎵</div>
+                </div>
+                <div class="chat-input-section">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Ask your DJ...">
+                    <button class="send-btn" id="sendBtn">
+                        <i data-lucide="send" width="20" height="20" stroke="white"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <audio id="audioPlayer" preload="none"></audio>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        const channels = [
+            { id: 1, name: 'EDM', genre: 'Electronic Dance Music', stream: 'https://stream.zeno.fm/f3wvbbqmdg8uv' },
+            { id: 2, name: 'Afro House', genre: 'Afro House Beats', stream: 'https://stream.zeno.fm/8ep58wtwrg8uv' },
+            { id: 3, name: 'Rock & Pop', genre: '90s to Now', stream: 'https://stream.zeno.fm/vafbmkhu0s8uv' }
+        ];
+
+        let activeChannel = null;
+        let isPlaying = false;
+        let apiKey = '';
+        let chatHistory = [];
+
+        const audio = document.getElementById('audioPlayer');
+        const player = document.getElementById('player');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const muteBtn = document.getElementById('muteBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeText = document.getElementById('volumeText');
+        const channelBtns = document.querySelectorAll('.channel-btn');
+        const currentChannelText = document.getElementById('current-channel');
+
+        const apiInputSection = document.getElementById('apiInputSection');
+        const chatSection = document.getElementById('chatSection');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const connectBtn = document.getElementById('connectBtn');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        // Channel selection
+        channelBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const channelId = parseInt(btn.dataset.channel);
+                const channel = channels.find(c => c.id === channelId);
+
+                if (activeChannel?.id === channelId) {
+                    togglePlayPause();
+                } else {
+                    selectChannel(channel, btn);
+                }
+            });
+        });
+
+        function selectChannel(channel, btnElement) {
+            activeChannel = channel;
+            audio.src = channel.stream;
+            audio.play();
+            isPlaying = true;
+
+            channelBtns.forEach(b => {
+                b.classList.remove('active');
+                b.querySelector('.equalizer').classList.add('hidden');
+            });
+
+            btnElement.classList.add('active');
+            btnElement.querySelector('.equalizer').classList.remove('hidden');
+
+            player.classList.remove('hidden');
+            currentChannelText.textContent = `${channel.name} - ${channel.genre}`;
+            updatePlayButton();
+        }
+
+        function togglePlayPause() {
+            if (!activeChannel) return;
+
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+            } else {
+                audio.play();
+                isPlaying = true;
+            }
+            updatePlayButton();
+        }
+
+        function updatePlayButton() {
+            const icon = playPauseBtn.querySelector('i');
+            icon.setAttribute('data-lucide', isPlaying ? 'pause' : 'play');
+            lucide.createIcons();
+        }
+
+        playPauseBtn.addEventListener('click', togglePlayPause);
+
+        // Volume control
+        volumeSlider.addEventListener('input', (e) => {
+            const value = e.target.value;
+            audio.volume = value / 100;
+            volumeText.textContent = `${value}%`;
+            updateVolumeIcon(value);
+        });
+
+        muteBtn.addEventListener('click', () => {
+            if (audio.volume > 0) {
+                audio.volume = 0;
+                volumeSlider.value = 0;
+                volumeText.textContent = '0%';
+            } else {
+                audio.volume = 0.7;
+                volumeSlider.value = 70;
+                volumeText.textContent = '70%';
+            }
+            updateVolumeIcon(volumeSlider.value);
+        });
+
+        function updateVolumeIcon(value) {
+            const icon = muteBtn.querySelector('i');
+            icon.setAttribute('data-lucide', value == 0 ? 'volume-x' : 'volume-2');
+            lucide.createIcons();
+        }
+
+        // API Key setup
+        connectBtn.addEventListener('click', () => {
+            apiKey = apiKeyInput.value.trim();
+            if (apiKey) {
+                apiInputSection.classList.add('hidden');
+                chatSection.classList.remove('hidden');
+            }
+        });
+
+        apiKeyInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                connectBtn.click();
+            }
+        });
+
+        // Chat functionality
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message || !apiKey) return;
+
+            addMessage('user', message);
+            chatInput.value = '';
+            sendBtn.disabled = true;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: `You are a fun AI DJ. User is listening to ${activeChannel ? activeChannel.name : 'nothing yet'}. Keep it brief and energetic! User: ${message}`
+                            }]
+                        }],
+                        generationConfig: { temperature: 0.9, maxOutputTokens: 150 }
+                    })
+                });
+
+                const data = await response.json();
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '🎧 Sorry, having trouble!';
+                addMessage('assistant', reply);
+            } catch (err) {
+                addMessage('assistant', '🎧 Connection issue! Check your API key!');
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        function addMessage(role, content) {
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            div.textContent = content;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Set initial volume
+        audio.volume = 0.7;
+    </script>
+</body>
+</html>
